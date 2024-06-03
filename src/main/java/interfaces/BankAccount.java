@@ -3,9 +3,9 @@ package main.java.interfaces;
 public interface BankAccount {
     String getAccNumber();
 
-    double getBalance();
+    int getBalance();
 
-    void setBalance(double balance);
+    void setBalance(int balance);
 
     void setAccNumber(String accNumber);
 }
