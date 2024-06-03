@@ -34,6 +34,7 @@ public class MoneyTransfer {
         getTransfers();
     }
 
+    // Получение переводов из файла
     private static void getTransfers() {
         FileWorker fileWorker = new FileWorker();
         List<String> fileLines = fileWorker.getParsedInputFiles(INPUT_FILES_PATH);
