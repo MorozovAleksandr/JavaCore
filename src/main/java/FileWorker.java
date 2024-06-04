@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FileWorker {
     private File[] readInputFiles(String path) {
@@ -28,20 +30,20 @@ public class FileWorker {
         return fileLines;
     }
 
-    public List<String> getParsedInputFiles(String path) {
+    public Map<String, List<String>> getParsedInputFiles(String path) {
         File[] files = readInputFiles(path);
-        List<String> AllFileLines = new ArrayList<>();
+        Map<String, List<String>> operations = new HashMap<>();
 
         for (File file : files) {
-            AllFileLines.addAll(getFileLines(file));
+            operations.put(file.getName(), getFileLines(file));
         }
 
-        return AllFileLines;
+        return operations;
     }
 
     public List<String> getParsedAccountsFile(String path) {
         File file = new File(path);
-        
+
         return getFileLines(file);
     }
 }

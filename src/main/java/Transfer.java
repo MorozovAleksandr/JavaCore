@@ -1,20 +1,25 @@
 package main.java;
 
+import main.java.interfaces.BankAccount;
+
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Transfer<T, K> {
-    private LocalDateTime date;
+    private final String formatDateTime = "dd.MM.yyyy-HH:mm:ss";
+    private String date;
     private String fileName;
     private T fromAcc;
     private K toAcc;
     private int transferAmount;
     private String transferResult;
+    private boolean isSuccess;
 
-    public LocalDateTime getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -58,13 +63,56 @@ public class Transfer<T, K> {
         this.transferResult = transferResult;
     }
 
-    public Transfer(LocalDateTime date, String fileName, T fromAcc, K toAcc, int transferAmount, String transferResult) {
-        this.date = date;
+    public boolean IsSuccess() {
+        return this.isSuccess;
+    }
+
+    public Transfer(String fileName, T fromAcc, K toAcc, int transferAmount) {
         this.fileName = fileName;
         this.fromAcc = fromAcc;
         this.toAcc = toAcc;
         this.transferAmount = transferAmount;
-        this.transferResult = transferResult;
+        handleDateTime();
+        handleResultAndUpdAccounts();
+    }
+
+    private void handleDateTime() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatDateTime);
+        String formattedDateTime = now.format(formatter);
+        setDate(formattedDateTime);
+    }
+
+    private void handleResultAndUpdAccounts() {
+        StringBuilder result = new StringBuilder();
+        if (fromAcc.getClass() == Account.class && toAcc.getClass() == Account.class && transferAmount > 0) {
+            BankAccount currentFromAcc = (BankAccount) fromAcc;
+
+            if (currentFromAcc.getBalance() >= transferAmount) {
+                result.append("Успешно обработан");
+                this.isSuccess = true;
+
+            } else {
+                result.append("Недостаточно средств");
+                this.isSuccess = false;
+            }
+
+            return;
+        }
+
+        if (fromAcc.getClass() != Account.class) {
+            result.append("Невалидный счет отправителя;");
+        }
+
+        /*if (toAcc.getClass() != Account.class) {
+            result.append("Невалидный счет получателя;");
+        }*/
+
+        if (transferAmount < 0) {
+            result.append("Неверная сумма перевода;");
+        }
+
+        setTransferResult(result.toString());
     }
 
     @Override
