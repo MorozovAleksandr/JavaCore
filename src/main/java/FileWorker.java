@@ -27,19 +27,30 @@ public class FileWorker {
                 fileLines.add(line);
             }
         } catch (IOException e) {
-            System.out.println("Произощла ошибка при чтении файла: " + e);
+            System.out.println("Произошла ошибка при чтении файла: " + e);
         }
 
         return fileLines;
     }
 
-    public void updateFile(String path, List<String> lines) {
+    public void updateFile(String path, List<String> lines, boolean isAppend) {
         Path filePath = Path.of(path);
 
         try {
-            Files.write(filePath, lines, StandardCharsets.UTF_8);
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
+
+            if (isAppend) {
+                List<String> existingLines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+                existingLines.addAll(lines);
+                Files.write(filePath, existingLines, StandardCharsets.UTF_8);
+            } else {
+                Files.write(filePath, lines, StandardCharsets.UTF_8);
+            }
+
         } catch (IOException e) {
-            System.out.println("Произощла ошибка при записи файла: " + e);
+            System.out.println("Произошла ошибка при записи файла: " + e);
         }
 
     }

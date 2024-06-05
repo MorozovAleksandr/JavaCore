@@ -14,6 +14,7 @@ public class MoneyTransfer {
 
     public static final String SEPARATOR = "\\|";
     public static final String ACCOUNTS_FILE_PATH = "src/main/resources/data/accounts.txt";
+    public static final String REPORT_FILE_PATH = "src/main/resources/data/report.txt";
     public static final String ACCOUNT_PATTERN = "\\d{5}-\\d{5}";
 
 
@@ -34,7 +35,12 @@ public class MoneyTransfer {
         getAccounts();
         getTransfers();
         updateFileAccBalance();
+        createReport();
+    }
 
+    private static void createReport() {
+        FileWorker fileWorker = new FileWorker();
+        fileWorker.updateFile(REPORT_FILE_PATH, transfers.stream().map(Transfer::toString).toList(), true);
     }
 
     private static void updateFileAccBalance() {
@@ -59,7 +65,7 @@ public class MoneyTransfer {
             return values[0] + "|" + values[1];
         }).toList();
 
-        fileWorker.updateFile(ACCOUNTS_FILE_PATH, updatedAccountsListFile);
+        fileWorker.updateFile(ACCOUNTS_FILE_PATH, updatedAccountsListFile, false);
     }
 
     // Получение переводов из файла
