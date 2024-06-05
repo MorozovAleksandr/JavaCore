@@ -5,12 +5,12 @@ import main.java.interfaces.BankAccount;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Transfer<T, K> {
+public class Transfer {
     private final String formatDateTime = "dd.MM.yyyy-HH:mm:ss";
     private String date;
     private String fileName;
-    private T fromAcc;
-    private K toAcc;
+    private Object fromAcc;
+    private Object toAcc;
     private int transferAmount;
     private String transferResult;
     private boolean isSuccess;
@@ -31,19 +31,19 @@ public class Transfer<T, K> {
         this.fileName = fileName;
     }
 
-    public T getFromAcc() {
+    public Object getFromAcc() {
         return fromAcc;
     }
 
-    public void setFromAcc(T fromAcc) {
+    public void setFromAcc(Object fromAcc) {
         this.fromAcc = fromAcc;
     }
 
-    public K getToAcc() {
+    public Object getToAcc() {
         return toAcc;
     }
 
-    public void setToAcc(K toAcc) {
+    public void setToAcc(Object toAcc) {
         this.toAcc = toAcc;
     }
 
@@ -63,11 +63,7 @@ public class Transfer<T, K> {
         this.transferResult = transferResult;
     }
 
-    public boolean IsSuccess() {
-        return this.isSuccess;
-    }
-
-    public Transfer(String fileName, T fromAcc, K toAcc, int transferAmount) {
+    public Transfer(String fileName, Object fromAcc, Object toAcc, int transferAmount) {
         this.fileName = fileName;
         this.fromAcc = fromAcc;
         this.toAcc = toAcc;
@@ -87,8 +83,11 @@ public class Transfer<T, K> {
         StringBuilder result = new StringBuilder();
         if (fromAcc.getClass() == Account.class && toAcc.getClass() == Account.class && transferAmount > 0) {
             BankAccount currentFromAcc = (BankAccount) fromAcc;
+            BankAccount currentToAcc = (BankAccount) toAcc;
 
             if (currentFromAcc.getBalance() >= transferAmount) {
+                currentFromAcc.setBalance(currentFromAcc.getBalance() - transferAmount);
+                currentToAcc.setBalance(currentToAcc.getBalance() + transferAmount);
                 result.append("Успешно обработан");
                 this.isSuccess = true;
 
@@ -97,6 +96,7 @@ public class Transfer<T, K> {
                 this.isSuccess = false;
             }
 
+            setTransferResult(result.toString());
             return;
         }
 
@@ -104,9 +104,9 @@ public class Transfer<T, K> {
             result.append("Невалидный счет отправителя;");
         }
 
-        /*if (toAcc.getClass() != Account.class) {
+        if (toAcc.getClass() != Account.class) {
             result.append("Невалидный счет получателя;");
-        }*/
+        }
 
         if (transferAmount < 0) {
             result.append("Неверная сумма перевода;");
@@ -120,4 +120,5 @@ public class Transfer<T, K> {
         // TODO: Проверить счета(fromAcc, toAcc) на тип, и в зависимости выводить данные
         return date + "|" + fileName + "|" + "Перевод с " + fromAcc + " на " + toAcc + " " + transferAmount + "|" + transferResult;
     }
+
 }

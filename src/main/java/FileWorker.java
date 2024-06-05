@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +31,17 @@ public class FileWorker {
         }
 
         return fileLines;
+    }
+
+    public void updateFile(String path, List<String> lines) {
+        Path filePath = Path.of(path);
+
+        try {
+            Files.write(filePath, lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            System.out.println("Произощла ошибка при записи файла: " + e);
+        }
+
     }
 
     public Map<String, List<String>> getParsedInputFiles(String path) {

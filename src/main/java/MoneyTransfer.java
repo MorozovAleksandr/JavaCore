@@ -1,5 +1,7 @@
 package main.java;
 
+import main.java.interfaces.BankAccount;
+
 import java.util.*;
 
 public class MoneyTransfer {
@@ -7,11 +9,12 @@ public class MoneyTransfer {
     private static final int OUTPUT_CODE = 2;
     private static final String OPERATION_NOT_FOUND = "Такой операции не существует";
     private static final String INPUT_FILES_PATH = "src/main/resources/data/input";
-    private static final String ACCOUNTS_FILE_PATH = "src/main/resources/data/accounts.txt";
-    private static final String ACCOUNT_PATTERN = "\\d{5}-\\d{5}";
-    private static final String SEPARATOR = "\\|";
     private static final Map<String, Account> accounts = new HashMap<>();
-    private static final List<Object> transfers = new ArrayList<>();
+    private static final List<Transfer> transfers = new ArrayList<>();
+
+    public static final String SEPARATOR = "\\|";
+    public static final String ACCOUNTS_FILE_PATH = "src/main/resources/data/accounts.txt";
+    public static final String ACCOUNT_PATTERN = "\\d{5}-\\d{5}";
 
 
     public static void startTransfer() {
@@ -30,6 +33,33 @@ public class MoneyTransfer {
     private static void parse() {
         getAccounts();
         getTransfers();
+        updateFileAccBalance();
+
+    }
+
+    private static void updateFileAccBalance() {
+        FileWorker fileWorker = new FileWorker();
+        List<String> accountsListFile = fileWorker.getParsedAccountsFile(ACCOUNTS_FILE_PATH);
+
+        List<String> updatedAccountsListFile = accountsListFile.stream().map(accountLine -> {
+            String[] values = accountLine.split(SEPARATOR);
+
+            if (values.length == 1) {
+                return values[0];
+            }
+
+            Optional<BankAccount> currentAcc = Optional.ofNullable(accounts.get(values[0]));
+
+            if (currentAcc.isPresent()) {
+                BankAccount acc = currentAcc.get();
+
+                values[1] = String.valueOf(acc.getBalance());
+            }
+
+            return values[0] + "|" + values[1];
+        }).toList();
+
+        fileWorker.updateFile(ACCOUNTS_FILE_PATH, updatedAccountsListFile);
     }
 
     // Получение переводов из файла
@@ -37,19 +67,15 @@ public class MoneyTransfer {
         FileWorker fileWorker = new FileWorker();
         Map<String, List<String>> operations = fileWorker.getParsedInputFiles(INPUT_FILES_PATH);
 
-        operations.keySet().forEach(fileName -> {
-            operations.get(fileName).forEach(operationList -> {
-                String[] values = operationList.split(SEPARATOR);
-                boolean isExistAccFrom = accounts.containsKey(values[0]);
-                boolean isExistAccTo = accounts.containsKey(values[1]);
-                var accFrom = isExistAccFrom ? accounts.get(values[0]) : values[0];
-                var accTo = isExistAccTo ? accounts.get(values[1]) : values[1];
+        operations.keySet().forEach(fileName -> operations.get(fileName).forEach(operationList -> {
+            String[] values = operationList.split(SEPARATOR);
+            boolean isExistAccFrom = accounts.containsKey(values[0]);
+            boolean isExistAccTo = accounts.containsKey(values[1]);
+            var accFrom = isExistAccFrom ? accounts.get(values[0]) : values[0];
+            var accTo = isExistAccTo ? accounts.get(values[1]) : values[1];
 
-                transfers.add(new Transfer<>(fileName, accFrom, accTo, Integer.parseInt(values[2])));
-            });
-        });
-
-        System.out.println(transfers);
+            transfers.add(new Transfer(fileName, accFrom, accTo, Integer.parseInt(values[2])));
+        }));
     }
 
     // Получение списка счетов из файла
