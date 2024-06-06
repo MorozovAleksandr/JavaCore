@@ -26,3 +26,7 @@ Chooses the parsing function.
 Program parses files from ‘input’ directory.
 Parsed files are moved to ‘archive’ directory.
 Report file is generated or updated.
+
+## Diagram class
+
+![Diagram/Diagram.png](Diagram/Diagram.png)
