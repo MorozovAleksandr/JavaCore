@@ -9,6 +9,7 @@ public class MoneyTransfer {
     private static final int OUTPUT_CODE = 2;
     private static final String OPERATION_NOT_FOUND = "Такой операции не существует";
     private static final String INPUT_FILES_PATH = "src/main/resources/data/input";
+    private static final String ARCHIVE_FILES_PATH = "src/main/resources/data/archive";
     private static final Map<String, Account> accounts = new HashMap<>();
     private static final List<Transfer> transfers = new ArrayList<>();
 
@@ -34,18 +35,28 @@ public class MoneyTransfer {
     private static void parse() {
         getAccounts();
         getTransfers();
+        moveFiles();
         updateFileAccBalance();
-        createReport();
+        report();
     }
 
-    private static void createReport() {
+    // Копирование и удаление входящих файлов
+    public static void moveFiles() {
+        FileWorker fileWorker = new FileWorker();
+        fileWorker.copyFiles(INPUT_FILES_PATH, ARCHIVE_FILES_PATH);
+        fileWorker.deleteFiles(INPUT_FILES_PATH);
+    }
+
+    // Создание/обновление файла отчета
+    private static void report() {
         FileWorker fileWorker = new FileWorker();
         fileWorker.updateFile(REPORT_FILE_PATH, transfers.stream().map(Transfer::toString).toList(), true);
     }
 
+    // Обновление баланса счетов в файле
     private static void updateFileAccBalance() {
         FileWorker fileWorker = new FileWorker();
-        List<String> accountsListFile = fileWorker.getParsedAccountsFile(ACCOUNTS_FILE_PATH);
+        List<String> accountsListFile = fileWorker.getParsedFile(ACCOUNTS_FILE_PATH);
 
         List<String> updatedAccountsListFile = accountsListFile.stream().map(accountLine -> {
             String[] values = accountLine.split(SEPARATOR);
@@ -87,7 +98,7 @@ public class MoneyTransfer {
     // Получение списка счетов из файла
     private static void getAccounts() {
         FileWorker fileWorker = new FileWorker();
-        List<String> accountsList = fileWorker.getParsedAccountsFile(ACCOUNTS_FILE_PATH);
+        List<String> accountsList = fileWorker.getParsedFile(ACCOUNTS_FILE_PATH);
 
         accountsList.forEach(str -> {
             String[] values = str.split(SEPARATOR);
@@ -99,6 +110,13 @@ public class MoneyTransfer {
     }
 
     private static void output() {
-        System.out.println("OUTPUT");
+        FileWorker fileWorker = new FileWorker();
+        List<String> reportList = fileWorker.getParsedFile(REPORT_FILE_PATH);
+
+        if (!reportList.isEmpty()) {
+            reportList.forEach(System.out::println);
+        } else {
+            System.out.println("Файла отчета не существует, запустит парсинг файлов");
+        }
     }
 }

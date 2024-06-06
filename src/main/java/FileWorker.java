@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,9 +67,30 @@ public class FileWorker {
         return operations;
     }
 
-    public List<String> getParsedAccountsFile(String path) {
+    public List<String> getParsedFile(String path) {
         File file = new File(path);
 
         return getFileLines(file);
+    }
+
+    public void copyFiles(String pathFrom, String pathTo) {
+        File[] copyFiles = readInputFiles(pathFrom);
+        File targetFolder = new File(pathTo);
+
+        try {
+            for (File file : copyFiles) {
+                Files.copy(file.toPath(), targetFolder.toPath().resolve(file.getName()), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            System.out.println("Произошла ошибка при копировании файла: " + e);
+        }
+    }
+
+    public void deleteFiles(String pathFrom) {
+        File[] removeFiles = readInputFiles(pathFrom);
+
+        for (File file : removeFiles) {
+            file.delete();
+        }
     }
 }

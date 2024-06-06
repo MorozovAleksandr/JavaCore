@@ -81,35 +81,29 @@ public class Transfer {
 
     private void handleResultAndUpdAccounts() {
         StringBuilder result = new StringBuilder();
-        if (fromAcc.getClass() == Account.class && toAcc.getClass() == Account.class && transferAmount > 0) {
-            BankAccount currentFromAcc = (BankAccount) fromAcc;
-            BankAccount currentToAcc = (BankAccount) toAcc;
 
+        if (fromAcc instanceof BankAccount currentFromAcc && toAcc instanceof BankAccount currentToAcc && transferAmount > 0) {
             if (currentFromAcc.getBalance() >= transferAmount) {
                 currentFromAcc.setBalance(currentFromAcc.getBalance() - transferAmount);
                 currentToAcc.setBalance(currentToAcc.getBalance() + transferAmount);
                 result.append("Успешно обработан");
                 this.isSuccess = true;
-
             } else {
                 result.append("Недостаточно средств");
                 this.isSuccess = false;
             }
+        } else {
+            if (!(fromAcc instanceof Account)) {
+                result.append("Невалидный счет отправителя;");
+            }
 
-            setTransferResult(result.toString());
-            return;
-        }
+            if (!(toAcc instanceof Account)) {
+                result.append("Невалидный счет получателя;");
+            }
 
-        if (fromAcc.getClass() != Account.class) {
-            result.append("Невалидный счет отправителя;");
-        }
-
-        if (toAcc.getClass() != Account.class) {
-            result.append("Невалидный счет получателя;");
-        }
-
-        if (transferAmount < 0) {
-            result.append("Неверная сумма перевода;");
+            if (transferAmount < 0) {
+                result.append("Неверная сумма перевода;");
+            }
         }
 
         setTransferResult(result.toString());
@@ -117,8 +111,20 @@ public class Transfer {
 
     @Override
     public String toString() {
-        // TODO: Проверить счета(fromAcc, toAcc) на тип, и в зависимости выводить данные
-        return date + "|" + fileName + "|" + "Перевод с " + fromAcc + " на " + toAcc + " " + transferAmount + "|" + transferResult;
+        StringBuilder sb = new StringBuilder();
+        if (fromAcc instanceof BankAccount) {
+            sb.append(((BankAccount) fromAcc).getAccNumber());
+        } else {
+            sb.append(fromAcc);
+        }
+
+        if (toAcc instanceof BankAccount) {
+            sb.append(" на ").append(((BankAccount) toAcc).getAccNumber());
+        } else {
+            sb.append(" на ").append(toAcc);
+        }
+
+        return date + "|" + fileName + "|Перевод с " + sb + " " + transferAmount + "|" + transferResult;
     }
 
 }
